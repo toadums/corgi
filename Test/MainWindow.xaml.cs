@@ -22,7 +22,7 @@ namespace Test
     public partial class MainWindow : Window
     {
 
-        Kinect KinectData = new Kinect();
+        Kinect KinectData = new Kinect(200,200);
         DrawingGroup drawingGroup;
         DrawingImage imageSource;
         

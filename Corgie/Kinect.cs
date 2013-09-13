@@ -19,6 +19,8 @@ namespace Corgie
         Skeleton _skeleton = null;
         SpeechRecognitionEngine SpeechEngine;
 
+        Corgi2 WorldSize;
+
         Skeleton PlayerSkeleton
         {
             get
@@ -35,9 +37,9 @@ namespace Corgie
             }
         }
 
-        public Kinect()
+        public Kinect(int x, int y)
         {
-            
+            WorldSize = new Corgi2(x, y);
         }
 
         public void Init()
@@ -143,7 +145,7 @@ namespace Corgie
             }
 
 
-            System.Diagnostics.Debug.WriteLine(RightHandAngle);
+            System.Diagnostics.Debug.WriteLine(Pointer);
 
         }
 
@@ -164,13 +166,13 @@ namespace Corgie
 
         }
 
-        public float RightHandAngle
+        public float RHRSAngle
         {
             get
             {
 
                 if (PlayerSkeleton == null)
-                    return 180.0f;
+                    return 0;
 
                 Joint shoulder = new Joint();
                 Joint hand = new Joint();
@@ -187,21 +189,83 @@ namespace Corgie
                     return 0;
 
 
-                Vector2 arm = new Vector2(hand.Position.X - shoulder.Position.X, hand.Position.Y - shoulder.Position.Y);
+                Corgi2 arm = new Corgi2(hand.Position.X - shoulder.Position.X, hand.Position.Y - shoulder.Position.Y);
                 arm.Normalize();
-                Vector2 plane = new Vector2(arm.X < 0 ? -1 : 1, 0);
+                Corgi2 plane = new Corgi2(arm.X < 0 ? -1 : 1, 0);
                 plane.Normalize();
 
                 float theta = (float)arm.Dot(plane);
                 theta = (float)Math.Acos(theta);
 
                 
+                //Set the correct Sign
+                return theta * (arm.Y < 0 ? -1 : 1);
+            }
+        }
 
-                return theta * 180.0f / (float)Math.PI;
+        public Corgi2 RHREVector
+        {
+            get
+            {
 
+                if (PlayerSkeleton == null)
+                    return new Corgi2(0, 0);
+
+                Joint elbow = new Joint();
+                Joint hand = new Joint();
+
+                foreach (Joint j in PlayerSkeleton.Joints)
+                {
+                    if (j.JointType == JointType.ElbowRight)
+                        elbow = j;
+                    else if (j.JointType == JointType.HandRight)
+                        hand = j;
+                }
+
+                if (Length(elbow.Position) == 0 && Length(hand.Position) == 0)
+                    return new Corgi2(0, 0);
+
+
+                Corgi2 arm = new Corgi2(hand.Position.X - elbow.Position.X, hand.Position.Y - elbow.Position.Y);
+                arm.Normalize();
+
+                return arm;
 
             }
         }
+
+        public Corgi2 RForearmNorm
+        {
+            get
+            {   
+                Corgi2 forearm = RHREVector;
+                return new Corgi2(forearm.Y, -forearm.X); 
+            }
+        }
+
+        public Corgi2 Pointer
+        {
+            get
+            {
+                Joint hand = new Joint();
+
+                foreach (Joint j in _skeleton.Joints)
+                {
+                    if (j.JointType == JointType.HandLeft)
+                    {
+                        hand = j;
+                        break;
+                    }
+                }
+
+                
+
+
+                return new Corgi2(hand.Position.X, hand.Position.Y);
+
+            }
+        }
+
 
         #endregion
 
@@ -281,10 +345,10 @@ namespace Corgie
 }
 
 
-public class Vector2
+public class Corgi2
 {
     public float X = 0, Y = 0;
-    public Vector2(float x, float y)
+    public Corgi2(float x, float y)
     {
         X = x;
         Y = y;
@@ -307,11 +371,16 @@ public class Vector2
         }
     }
 
-    public float Dot(Vector2 p)
+    public float Dot(Corgi2 p)
     {
 
         return p.X * X + p.Y * Y;
 
+    }
+
+    public override string ToString()
+    {
+        return "<" + X + ", " + Y + ">";
     }
 
 }
