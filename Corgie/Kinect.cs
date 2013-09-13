@@ -16,7 +16,7 @@ namespace Corgie
         KinectSensor Sensor;
         Skeleton[] _skeletonData;
 
-        Skeleton _skeleton;
+        Skeleton _skeleton = null;
         SpeechRecognitionEngine SpeechEngine;
 
         Skeleton PlayerSkeleton
@@ -118,7 +118,7 @@ namespace Corgie
         #region SKELETON
         private void Sensor_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            _skeletonData = new Skeleton[0];
+            Skeleton[] _skeletonData = new Skeleton[0];
             using (SkeletonFrame skelFrame = e.OpenSkeletonFrame())
             {
                 if (skelFrame != null)
@@ -130,15 +130,20 @@ namespace Corgie
 
             foreach (Skeleton s in _skeletonData)
             {
-                if (_skeleton == null && (Length(s.Position) > 0))
+                if (_skeleton.TrackingState == SkeletonTrackingState.NotTracked && (Length(s.Position) > 0))
+                {
+                    _skeleton = s;
+                    _skeleton.TrackingState = SkeletonTrackingState.Tracked;
+                }
+                else if (s.TrackingState == SkeletonTrackingState.Tracked && _skeleton != null && s.TrackingId == _skeleton.TrackingId)
                 {
                     _skeleton = s;
                 }
-                else if (_skeleton != null && s.TrackingId != _skeleton.TrackingId)
-                {
-                    _skeleton = s;
-                }
+
             }
+
+
+            System.Diagnostics.Debug.WriteLine(RightHandAngle);
 
         }
 
@@ -146,7 +151,7 @@ namespace Corgie
         {
 
             SkeletonPoint point = new SkeletonPoint();
-            
+
             foreach (Joint j in _skeleton.Joints)
             {
                 if (j.JointType == joint)
@@ -158,6 +163,46 @@ namespace Corgie
             return point;
 
         }
+
+        public float RightHandAngle
+        {
+            get
+            {
+
+                if (PlayerSkeleton == null)
+                    return 180.0f;
+
+                Joint shoulder = new Joint();
+                Joint hand = new Joint();
+
+                foreach (Joint j in PlayerSkeleton.Joints)
+                {
+                    if (j.JointType == JointType.ShoulderRight)
+                        shoulder = j;
+                    else if (j.JointType == JointType.HandRight)
+                        hand = j;   
+                }
+
+                if (Length(shoulder.Position) == 0 && Length(hand.Position) == 0)
+                    return 0;
+
+
+                Vector2 arm = new Vector2(hand.Position.X - shoulder.Position.X, hand.Position.Y - shoulder.Position.Y);
+                arm.Normalize();
+                Vector2 plane = new Vector2(arm.X < 0 ? -1 : 1, 0);
+                plane.Normalize();
+
+                float theta = (float)arm.Dot(plane);
+                theta = (float)Math.Acos(theta);
+
+                
+
+                return theta * 180.0f / (float)Math.PI;
+
+
+            }
+        }
+
         #endregion
 
         #region HELPER
@@ -170,6 +215,13 @@ namespace Corgie
         {
             return (float)Math.Sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
         }
+
+        private void print(SkeletonPoint p)
+        {
+            System.Diagnostics.Debug.WriteLine("pos: [" + p.X + ", " + p.Y + ", " + p.Z + "]");
+        }
+
+
         #endregion
 
         #region SPEECH
@@ -229,7 +281,40 @@ namespace Corgie
 }
 
 
+public class Vector2
+{
+    public float X = 0, Y = 0;
+    public Vector2(float x, float y)
+    {
+        X = x;
+        Y = y;
+    }
 
+    public void Normalize()
+    {
+        if (Length != 0)
+        {
+            this.X /= Length;
+            this.Y /= Length;
+        }
+    }
+
+    public float Length
+    {
+        get
+        {
+            return (float)Math.Sqrt(X * X + Y * Y);
+        }
+    }
+
+    public float Dot(Vector2 p)
+    {
+
+        return p.X * X + p.Y * Y;
+
+    }
+
+}
 
 
 
