@@ -37,6 +37,23 @@ namespace Corgie
             }
         }
 
+        private string _col = "";
+
+        public String LastColor
+        {
+            get
+            {
+                string col = _col;
+                _col = "";
+                return col;
+            }
+
+            set
+            {
+                _col = value;
+            }
+        }
+
         public Kinect(int x, int y)
         {
             WorldSize = new Corgi2(x, y);
@@ -145,7 +162,7 @@ namespace Corgie
             }
 
 
-            System.Diagnostics.Debug.WriteLine(Pointer);
+            //System.Diagnostics.Debug.WriteLine(Pointer);
 
         }
 
@@ -324,18 +341,10 @@ namespace Corgie
             if (e.Result.Confidence >= ConfidenceThreshold)
             {
 
-                System.Diagnostics.Debug.WriteLine(e.Result.Semantics.Value.ToString());
+                System.Diagnostics.Debug.WriteLine("COLOR: " + e.Result.Semantics.Value.ToString());
 
-                switch (e.Result.Semantics.Value.ToString())
-                {
-                    case "FORWARD":
-                       
-                        break;
-
-                    case "BACKWARD":
-                       
-                        break;
-                }
+                _col = e.Result.Semantics.Value.ToString();
+                
             }
         }
 

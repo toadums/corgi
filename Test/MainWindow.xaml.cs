@@ -46,5 +46,10 @@ namespace Test
             // Display the drawing using our image control
             Image.Source = imageSource;
         }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine(KinectData.LastColor);
+        }
     }
 }
