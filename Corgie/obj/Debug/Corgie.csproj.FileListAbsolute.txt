@@ -3,3 +3,4 @@ C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\bin\Debug\Corg
 C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\bin\Debug\Corgie.pdb
 C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.dll
 C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.pdb
+C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.g.resources
