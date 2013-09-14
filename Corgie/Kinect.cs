@@ -213,7 +213,7 @@ namespace Corgie
                 {
                     _skeleton = s;
                     _skeleton.TrackingState = SkeletonTrackingState.Tracked;
-                    Console.WriteLine(_skeleton.TrackingId);
+                    Console.WriteLine("New User: " + _skeleton.TrackingId);
                 }
 
                 NoSkel = false;
