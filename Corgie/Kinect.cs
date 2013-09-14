@@ -213,10 +213,9 @@ namespace Corgie
                     _skeleton = s;
                     _skeleton.TrackingState = SkeletonTrackingState.Tracked;
                 }
-                else if (s.TrackingState == SkeletonTrackingState.Tracked && _skeleton != null && s.TrackingId == _skeleton.TrackingId)
-                {
-                    _skeleton = s;
-                }
+
+                _skeleton = s;
+                break;
             }
             
         }
