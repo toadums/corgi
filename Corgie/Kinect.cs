@@ -275,6 +275,42 @@ namespace Corgie
             }
         }
 
+        public float RPRKAngle
+        {
+            get
+            {
+
+                if (PlayerSkeleton == null)
+                    return 0;
+
+                Joint hip = new Joint();
+                Joint knee = new Joint();
+
+                foreach (Joint j in PlayerSkeleton.Joints)
+                {
+                    if (j.JointType == JointType.HipRight)
+                        hip = j;
+                    else if (j.JointType == JointType.KneeRight)
+                        knee = j;
+                }
+
+                if (Length(hip.Position) == 0 && Length(knee.Position) == 0)
+                    return 0;
+
+
+                Corgi2 thigh = new Corgi2(knee.Position.X - hip.Position.X, knee.Position.Y - hip.Position.Y);
+                thigh.Normalize();
+                Corgi2 plane = new Corgi2(thigh.X < 0 ? -1 : 1, 0);
+                plane.Normalize();
+
+                float theta = (float)thigh.Dot(plane);
+                theta = (float)Math.Acos(theta);
+
+                //Set the correct Sign
+                return theta * (thigh.Y < 0 ? -1 : 1);
+            }
+        }
+
         public Corgi2 LHLEVector
         {
             get
@@ -419,11 +455,8 @@ namespace Corgie
 
                    _hand = new Corgi2((float)hands[0].X, (float)hands[0].Y);
                 }
-
-                
             }
-
-        }
+        }   
 
         /// <summary>
         /// Handles the checking or unchecking of the near mode combo box
