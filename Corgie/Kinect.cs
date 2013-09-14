@@ -92,10 +92,20 @@ namespace Corgie
                 _userInfos = new UserInfo[InteractionFrame.UserInfoArrayLength];
                 _skeletonData = new Skeleton[Sensor.SkeletonStream.FrameSkeletonArrayLength];
 
-                Sensor.DepthStream.Range = DepthRange.Default;
+
                 Sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
 
-                Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
+                try
+                {
+                    Sensor.DepthStream.Range = DepthRange.Near;
+                    Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+                }
+                catch (Exception e)
+                {
+                    Sensor.DepthStream.Range = DepthRange.Default;
+                    Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
+                }
+
                 Sensor.SkeletonStream.EnableTrackingInNearRange = true;
                 Sensor.SkeletonStream.Enable(new TransformSmoothParameters()
                 {
@@ -203,6 +213,7 @@ namespace Corgie
 
             foreach (Skeleton s in _skeletonData)
             {
+                if (s == null) continue;
                 if (_skeleton.TrackingState == SkeletonTrackingState.NotTracked && (Length(s.Position) > 0))
                 {
                     _skeleton = s;
