@@ -16,7 +16,7 @@ namespace Corgie
     {
 
         bool NearMode = false;
-
+        bool NoSkel = true;
         KinectSensor Sensor;
         Skeleton[] _skeletonData;
 
@@ -209,19 +209,20 @@ namespace Corgie
             {
                 if (s == null || s.TrackingId == 0) continue;
 
-                if (_skeleton == null || _skeleton.TrackingState == SkeletonTrackingState.NotTracked)
+                if (NoSkel || _skeleton.TrackingState == SkeletonTrackingState.NotTracked)
                 {
                     _skeleton = s;
                     _skeleton.TrackingState = SkeletonTrackingState.Tracked;
                     Console.WriteLine(_skeleton.TrackingId);
                 }
 
+                NoSkel = false;
                 _skeleton = s;
 
                 return;
             }
 
-            _skeleton = null;
+            NoSkel = true;
 
         }
 
@@ -408,6 +409,48 @@ namespace Corgie
             }
         }
 
+
+        public float RFRPAngle
+        {
+            get
+            {
+
+                if (PlayerSkeleton == null)
+                    return 0;
+
+                Joint hip = new Joint();
+                Joint foot = new Joint();
+
+                foreach (Joint j in PlayerSkeleton.Joints)
+                {
+                    if (j.JointType == JointType.ShoulderRight)
+                        hip = j;
+                    else if (j.JointType == JointType.HandRight)
+                        foot = j;
+                }
+
+                if (Length(hip.Position) == 0 && Length(foot.Position) == 0)
+                    return 0;
+
+
+                Corgi2 leg = new Corgi2(foot.Position.X - hip.Position.X, foot.Position.Y - hip.Position.Y);
+                leg.Normalize();
+                Corgi2 plane = new Corgi2(leg.X < 0 ? -1 : 1, 0);
+                plane.Normalize();
+
+                float theta = (float)leg.Dot(plane);
+                theta = (float)Math.Acos(theta);
+
+
+                //Set the correct Sign
+                return theta * (leg.Y < 0 ? -1 : 1);
+            }
+        }
+
+
+
+
+
         public Corgi2 LForearmNorm
         {
             get
@@ -431,6 +474,14 @@ namespace Corgie
             get
             {
                 return _skeleton.Position.X;
+            }
+        }
+
+        public bool UserReady
+        {
+            get
+            {
+                return _skeleton != null;
             }
         }
 
@@ -468,7 +519,6 @@ namespace Corgie
 
                 if ("True".Equals(value, StringComparison.OrdinalIgnoreCase) && "en-US".Equals(recognizer.Culture.Name, StringComparison.OrdinalIgnoreCase))
                 {
-
                     return recognizer;
                 }
             }
