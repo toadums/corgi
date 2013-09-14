@@ -95,12 +95,11 @@ namespace Corgie
 
                 Sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
 
-                try
-                {
+                if(false) {
                     Sensor.DepthStream.Range = DepthRange.Near;
                     Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
                 }
-                catch (Exception e)
+                else
                 {
                     Sensor.DepthStream.Range = DepthRange.Default;
                     Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
