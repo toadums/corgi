@@ -269,6 +269,24 @@ namespace Corgie
             }
         }
 
+        public float HeadNormAngle
+        {
+            get
+            {
+                Corgi2 head = HeadNormal;
+
+                Corgi2 plane = new Corgi2(head.X < 0 ? -1 : 1, 0);
+                plane.Normalize();
+
+                float theta = (float)head.Dot(plane);
+                theta = (float)Math.Acos(theta);
+
+
+                //Set the correct Sign
+                return theta * (head.Y < 0 ? -1 : 1);
+            }
+        }
+
         public Corgi2 HeadNormal
         {
             get
