@@ -15,6 +15,8 @@ namespace Corgie
     public class Kinect
     {
 
+        bool NearMode = false;
+
         KinectSensor Sensor;
         Skeleton[] _skeletonData;
 
@@ -144,6 +146,8 @@ namespace Corgie
                     directions.Add(new SemanticResultValue("blew", "BLUE"));
                     directions.Add(new SemanticResultValue("green", "GREEN"));
                     directions.Add(new SemanticResultValue("grin", "GREEN"));
+                    directions.Add(new SemanticResultValue("sit", "SIT"));
+                    directions.Add(new SemanticResultValue("stand", "STAND"));
 
 
                     var gb = new GrammarBuilder { Culture = ri.Culture };
@@ -368,9 +372,14 @@ namespace Corgie
             if (e.Result.Confidence >= ConfidenceThreshold)
             {
 
-                System.Diagnostics.Debug.WriteLine("COLOR: " + e.Result.Semantics.Value.ToString());
+                System.Diagnostics.Debug.WriteLine("SPEECH: " + e.Result.Semantics.Value.ToString());
 
-                _col = e.Result.Semantics.Value.ToString();
+                switch (e.Result.Semantics.Value.ToString())
+                {
+                    case "SIT": ChangeViewMode("SIT"); break;
+                    case "STAND": ChangeViewMode("STAND"); break;
+                    default: _col = e.Result.Semantics.Value.ToString(); break;
+                }
                 
             }
         }
@@ -414,6 +423,34 @@ namespace Corgie
                 
             }
 
+        }
+
+        /// <summary>
+        /// Handles the checking or unchecking of the near mode combo box
+        /// </summary>
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void ChangeViewMode(string mode)
+        {
+            if (Sensor != null)
+            {
+                try
+                {
+                    if (mode == "SIT")
+                    {
+                        Sensor.DepthStream.Range = DepthRange.Near;
+                        Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+                    }
+                    else
+                    {
+                        Sensor.DepthStream.Range = DepthRange.Default;
+                        Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                }
+            }
         }
 
         
