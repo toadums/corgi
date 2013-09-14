@@ -1,6 +1,10 @@
-C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.csprojResolveAssemblyReference.cache
 C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\bin\Debug\Corgie.dll
 C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\bin\Debug\Corgie.pdb
+C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\bin\Debug\Microsoft.Kinect.Toolkit.dll
+C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.g.resources
 C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.dll
 C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.pdb
-C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.g.resources
+C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\bin\Debug\Microsoft.Kinect.Toolkit.Controls.dll
+C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\bin\Debug\Microsoft.Kinect.Toolkit.Fusion.dll
+C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\bin\Debug\Microsoft.Kinect.Toolkit.Interaction.dll
+C:\Users\Paul\documents\visual studio 2012\Projects\Corgie\Corgie\obj\Debug\Corgie.csprojResolveAssemblyReference.cache

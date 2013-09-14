@@ -1,4 +1,5 @@
 ﻿using Microsoft.Kinect;
+using Microsoft.Kinect.Toolkit.Interaction;
 using Microsoft.Speech.AudioFormat;
 using Microsoft.Speech.Recognition;
 using System;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace Corgie
 {
@@ -21,6 +23,8 @@ namespace Corgie
 
         Corgi2 WorldSize;
 
+        InteractionStream _interactionStream;
+        private UserInfo[] _userInfos; //the information about the interactive users
         Skeleton PlayerSkeleton
         {
             get
@@ -38,6 +42,16 @@ namespace Corgie
         }
 
         private string _col = "";
+
+        private Corgi2 _hand;
+
+        public Corgi2 Hand
+        {
+            get
+            {
+                return _hand;
+            }
+        }
 
         public String LastColor
         {
@@ -73,6 +87,16 @@ namespace Corgie
 
             if (Sensor != null)
             {
+
+                _skeleton = new Skeleton();
+                _userInfos = new UserInfo[InteractionFrame.UserInfoArrayLength];
+                _skeletonData = new Skeleton[Sensor.SkeletonStream.FrameSkeletonArrayLength];
+
+                Sensor.DepthStream.Range = DepthRange.Near;
+                Sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
+
+                Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+                Sensor.SkeletonStream.EnableTrackingInNearRange = true;
                 Sensor.SkeletonStream.Enable(new TransformSmoothParameters()
                 {
                     Smoothing = 0.5f,
@@ -81,10 +105,12 @@ namespace Corgie
                     JitterRadius = 0.05f,
                     MaxDeviationRadius = 0.04f
                 });
-                Sensor.SkeletonFrameReady += Sensor_SkeletonFrameReady;
-                Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
 
-                _skeleton = new Skeleton();
+                 _interactionStream = new InteractionStream(Sensor, new DummyInteractionClient());
+                 _interactionStream.InteractionFrameReady += InteractionStreamOnInteractionFrameReady;
+                 
+                Sensor.DepthFrameReady += SensorOnDepthFrameReady;
+                Sensor.SkeletonFrameReady += Sensor_SkeletonFrameReady;
 
                 try
                 {
@@ -96,6 +122,7 @@ namespace Corgie
                 }
             }
 
+            #region INITSPEECH
             RecognizerInfo ri = GetKinectRecognizer();
 
             if (null != ri)
@@ -137,20 +164,40 @@ namespace Corgie
                     Sensor.AudioSource.Start(), new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
                 SpeechEngine.RecognizeAsync(RecognizeMode.Multiple);
             }
+            #endregion
 
         }
 
+        private void SensorOnDepthFrameReady(object sender, DepthImageFrameReadyEventArgs depthImageFrameReadyEventArgs)
+        {
+            using (DepthImageFrame depthFrame = depthImageFrameReadyEventArgs.OpenDepthImageFrame())
+            {
+                if (depthFrame == null)
+                    return;
+
+                try
+                {
+                    _interactionStream.ProcessDepth(depthFrame.GetRawPixelData(), depthFrame.Timestamp);
+                }
+                catch (InvalidOperationException)
+                {
+                    // DepthFrame functions may throw when the sensor gets
+                    // into a bad state.  Ignore the frame in that case.
+                }
+            }
+        }
 
         #region SKELETON
         private void Sensor_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            Skeleton[] _skeletonData = new Skeleton[0];
             using (SkeletonFrame skelFrame = e.OpenSkeletonFrame())
             {
                 if (skelFrame != null)
                 {
-                    _skeletonData = new Skeleton[skelFrame.SkeletonArrayLength];
                     skelFrame.CopySkeletonDataTo(_skeletonData);
+                    var accelerometerReading = Sensor.AccelerometerGetCurrentReading();
+                    _interactionStream.ProcessSkeleton(_skeletonData, accelerometerReading, skelFrame.Timestamp);
+               
                 }
             }
 
@@ -165,10 +212,7 @@ namespace Corgie
                 {
                     _skeleton = s;
                 }
-
             }
-
-            Console.WriteLine(LForearmNorm);
             
         }
 
@@ -266,30 +310,6 @@ namespace Corgie
             }
         }
 
-        public Corgi2 Pointer
-        {
-            get
-            {
-                Joint hand = new Joint();
-
-                foreach (Joint j in _skeleton.Joints)
-                {
-                    if (j.JointType == JointType.HandLeft)
-                    {
-                        hand = j;
-                        break;
-                    }
-                }
-
-                
-
-
-                return new Corgi2(hand.Position.X, hand.Position.Y);
-
-            }
-        }
-
-
         #endregion
 
         #region HELPER
@@ -356,7 +376,48 @@ namespace Corgie
 
         #endregion
 
+        private Dictionary<int, InteractionHandEventType> _lastLeftHandEvents = new Dictionary<int, InteractionHandEventType>();
+        private Dictionary<int, InteractionHandEventType> _lastRightHandEvents = new Dictionary<int, InteractionHandEventType>();
+
+        private void InteractionStreamOnInteractionFrameReady(object sender, InteractionFrameReadyEventArgs args)
+        {
+            using (var iaf = args.OpenInteractionFrame()) //dispose as soon as possible
+            {
+                if (iaf == null)
+                    return;
+
+                iaf.CopyInteractionDataTo(_userInfos);
+            }
+
+            StringBuilder dump = new StringBuilder();
+
+            var hasUser = false;
+            foreach (var userInfo in _userInfos)
+            {
+                var userID = userInfo.SkeletonTrackingId;
+                if (userID == 0)
+                    continue;
+
+                hasUser = true;
+                dump.AppendLine("User ID = " + userID);
+                dump.AppendLine("  Hands: ");
+                var hands = userInfo.HandPointers;
+                if (hands.Count == 0)
+                    dump.AppendLine("    No hands");
+                else
+                {
+
+                   _hand = new Corgi2((float)hands[0].X, (float)hands[0].Y);
+                }
+
+                
+            }
+
+        }
+
+        
     }
+
 }
 
 
@@ -397,16 +458,26 @@ public class Corgi2
     {
         return "<" + X + ", " + Y + ">";
     }
-
 }
 
 
+public class DummyInteractionClient : IInteractionClient
+{
+    public InteractionInfo GetInteractionInfoAtLocation(
+        int skeletonTrackingId,
+        InteractionHandType handType,
+       double x,
+        double y)
+    {
+        var result = new InteractionInfo();
+        result.IsGripTarget = true;
+        result.IsPressTarget = true;
+        result.PressAttractionPointX = 0.5;
+        result.PressAttractionPointY = 0.5;
+        result.PressTargetControlId = 1;
 
-
-
-
-
-
-
+        return result;
+    }
+}
 
 
