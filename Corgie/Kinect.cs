@@ -208,16 +208,16 @@ namespace Corgie
             foreach (Skeleton s in _skeletonData)
             {
                 if (s == null) continue;
+
                 if (_skeleton.TrackingState == SkeletonTrackingState.NotTracked && (Length(s.Position) > 0))
                 {
                     _skeleton = s;
                     _skeleton.TrackingState = SkeletonTrackingState.Tracked;
                 }
-
-                _skeleton = s;
+                if (s.TrackingId != 0) 
+                    _skeleton = s;
                 break;
             }
-            
         }
 
         public SkeletonPoint GetJointPos(JointType joint)
@@ -409,6 +409,23 @@ namespace Corgie
             {   
                 Corgi2 forearm = LHLEVector;
                 return new Corgi2(forearm.Y, -forearm.X); 
+            }
+        }
+
+        public float UserZ
+        {
+            get
+            {
+                return _skeleton.Position.Z;
+            }
+        }
+
+
+        public float UserX
+        {
+            get
+            {
+                return _skeleton.Position.X;
             }
         }
 
