@@ -207,17 +207,22 @@ namespace Corgie
 
             foreach (Skeleton s in _skeletonData)
             {
-                if (s == null) continue;
+                if (s == null || s.TrackingId == 0) continue;
 
-                if (_skeleton.TrackingState == SkeletonTrackingState.NotTracked && (Length(s.Position) > 0))
+                if (_skeleton == null || _skeleton.TrackingState == SkeletonTrackingState.NotTracked)
                 {
                     _skeleton = s;
                     _skeleton.TrackingState = SkeletonTrackingState.Tracked;
+                    Console.WriteLine(_skeleton.TrackingId);
                 }
-                if (s.TrackingId != 0) 
-                    _skeleton = s;
-                break;
+
+                _skeleton = s;
+
+                return;
             }
+
+            _skeleton = null;
+
         }
 
         public SkeletonPoint GetJointPos(JointType joint)
