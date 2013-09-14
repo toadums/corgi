@@ -43,7 +43,7 @@ namespace Corgie
             }
         }
 
-        private string _col = "";
+        private static string _col = "";
 
         private Corgi2 _hand;
 
@@ -237,6 +237,47 @@ namespace Corgie
             return point;
 
         }
+
+        public Corgi2 HeadVector
+        {
+            get
+            {
+
+                if (PlayerSkeleton == null)
+                    return new Corgi2(0, 0);
+
+                Joint head = new Joint();
+                Joint neck = new Joint();
+
+                foreach (Joint j in PlayerSkeleton.Joints)
+                {
+                    if (j.JointType == JointType.Head)
+                        head = j;
+                    else if (j.JointType == JointType.ShoulderCenter)
+                        neck = j;
+                }
+
+                if (Length(head.Position) == 0 && Length(neck.Position) == 0)
+                    return new Corgi2(0, 0);
+
+
+                Corgi2 head_up = new Corgi2(head.Position.X - neck.Position.X, head.Position.Y - neck.Position.Y);
+                head_up.Normalize();
+
+                return head_up;
+
+            }
+        }
+
+        public Corgi2 HeadNormal
+        {
+            get
+            {
+                Corgi2 head = HeadVector;
+                return new Corgi2(head.Y, -head.X); 
+            }
+        }
+
 
         public float RHRSAngle
         {
