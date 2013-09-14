@@ -273,6 +273,9 @@ namespace Corgie
         {
             get
             {
+                if (PlayerSkeleton == null)
+                    return 0;
+
                 Corgi2 head = HeadNormal;
 
                 Corgi2 plane = new Corgi2(head.X < 0 ? -1 : 1, 0);
