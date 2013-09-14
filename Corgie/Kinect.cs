@@ -92,10 +92,10 @@ namespace Corgie
                 _userInfos = new UserInfo[InteractionFrame.UserInfoArrayLength];
                 _skeletonData = new Skeleton[Sensor.SkeletonStream.FrameSkeletonArrayLength];
 
-                Sensor.DepthStream.Range = DepthRange.Near;
+                Sensor.DepthStream.Range = DepthRange.Default;
                 Sensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
 
-                Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Seated;
+                Sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
                 Sensor.SkeletonStream.EnableTrackingInNearRange = true;
                 Sensor.SkeletonStream.Enable(new TransformSmoothParameters()
                 {
@@ -106,9 +106,9 @@ namespace Corgie
                     MaxDeviationRadius = 0.04f
                 });
 
-                 _interactionStream = new InteractionStream(Sensor, new DummyInteractionClient());
-                 _interactionStream.InteractionFrameReady += InteractionStreamOnInteractionFrameReady;
-                 
+                _interactionStream = new InteractionStream(Sensor, new DummyInteractionClient());
+                _interactionStream.InteractionFrameReady += InteractionStreamOnInteractionFrameReady;
+
                 Sensor.DepthFrameReady += SensorOnDepthFrameReady;
                 Sensor.SkeletonFrameReady += Sensor_SkeletonFrameReady;
 
@@ -120,52 +120,52 @@ namespace Corgie
                 {
                     Sensor = null;
                 }
+
+
+                #region INITSPEECH
+                RecognizerInfo ri = GetKinectRecognizer();
+
+                if (null != ri && Sensor != null)
+                {
+                    SpeechEngine = new SpeechRecognitionEngine(ri.Id);
+
+
+                    /****************************************************************
+                    * 
+                    * Use this code to create grammar programmatically rather than from
+                    * a grammar file.
+                    */
+                    var directions = new Choices();
+                    directions.Add(new SemanticResultValue("yellow", "YELLOW"));
+                    directions.Add(new SemanticResultValue("yeller", "YELLOW"));
+                    directions.Add(new SemanticResultValue("red", "RED"));
+                    directions.Add(new SemanticResultValue("read", "RED"));
+                    directions.Add(new SemanticResultValue("blue", "BLUE"));
+                    directions.Add(new SemanticResultValue("blew", "BLUE"));
+                    directions.Add(new SemanticResultValue("green", "GREEN"));
+                    directions.Add(new SemanticResultValue("grin", "GREEN"));
+
+
+                    var gb = new GrammarBuilder { Culture = ri.Culture };
+                    gb.Append(directions);
+
+                    var g = new Grammar(gb);
+                    SpeechEngine.LoadGrammar(g);
+
+
+
+                    SpeechEngine.SpeechRecognized += SpeechRecognized;
+
+                    // For long recognition sessions (a few hours or more), it may be beneficial to turn off adaptation of the acoustic model. 
+                    // This will prevent recognition accuracy from degrading over time.
+                    ////speechEngine.UpdateRecognizerSetting("AdaptationOn", 0);
+
+                    SpeechEngine.SetInputToAudioStream(
+                        Sensor.AudioSource.Start(), new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
+                    SpeechEngine.RecognizeAsync(RecognizeMode.Multiple);
+                }
+                #endregion
             }
-
-            #region INITSPEECH
-            RecognizerInfo ri = GetKinectRecognizer();
-
-            if (null != ri)
-            {
-                SpeechEngine = new SpeechRecognitionEngine(ri.Id);
-
-
-                /****************************************************************
-                * 
-                * Use this code to create grammar programmatically rather than from
-                * a grammar file.
-                */
-                var directions = new Choices();
-                directions.Add(new SemanticResultValue("yellow", "YELLOW"));
-                directions.Add(new SemanticResultValue("yeller", "YELLOW"));
-                directions.Add(new SemanticResultValue("red", "RED"));
-                directions.Add(new SemanticResultValue("read", "RED"));
-                directions.Add(new SemanticResultValue("blue", "BLUE"));
-                directions.Add(new SemanticResultValue("blew", "BLUE"));
-                directions.Add(new SemanticResultValue("green", "GREEN"));
-                directions.Add(new SemanticResultValue("grin", "GREEN"));
-
-
-                var gb = new GrammarBuilder { Culture = ri.Culture };
-                gb.Append(directions);
-
-                var g = new Grammar(gb);
-                SpeechEngine.LoadGrammar(g);
-
-               
-
-                SpeechEngine.SpeechRecognized += SpeechRecognized;
-
-                // For long recognition sessions (a few hours or more), it may be beneficial to turn off adaptation of the acoustic model. 
-                // This will prevent recognition accuracy from degrading over time.
-                ////speechEngine.UpdateRecognizerSetting("AdaptationOn", 0);
-
-                SpeechEngine.SetInputToAudioStream(
-                    Sensor.AudioSource.Start(), new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
-                SpeechEngine.RecognizeAsync(RecognizeMode.Multiple);
-            }
-            #endregion
-
         }
 
         private void SensorOnDepthFrameReady(object sender, DepthImageFrameReadyEventArgs depthImageFrameReadyEventArgs)
@@ -408,6 +408,7 @@ namespace Corgie
                 {
 
                    _hand = new Corgi2((float)hands[0].X, (float)hands[0].Y);
+                   Console.WriteLine(_hand);
                 }
 
                 
