@@ -161,9 +161,8 @@ namespace Corgie
 
             }
 
-
-            //System.Diagnostics.Debug.WriteLine(Pointer);
-
+            Console.WriteLine(LForearmNorm);
+            
         }
 
         public SkeletonPoint GetJointPos(JointType joint)
@@ -220,7 +219,7 @@ namespace Corgie
             }
         }
 
-        public Corgi2 RHREVector
+        public Corgi2 LHLEVector
         {
             get
             {
@@ -233,9 +232,9 @@ namespace Corgie
 
                 foreach (Joint j in PlayerSkeleton.Joints)
                 {
-                    if (j.JointType == JointType.ElbowRight)
+                    if (j.JointType == JointType.ElbowLeft)
                         elbow = j;
-                    else if (j.JointType == JointType.HandRight)
+                    else if (j.JointType == JointType.HandLeft)
                         hand = j;
                 }
 
@@ -251,11 +250,11 @@ namespace Corgie
             }
         }
 
-        public Corgi2 RForearmNorm
+        public Corgi2 LForearmNorm
         {
             get
             {   
-                Corgi2 forearm = RHREVector;
+                Corgi2 forearm = LHLEVector;
                 return new Corgi2(forearm.Y, -forearm.X); 
             }
         }

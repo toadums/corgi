@@ -49,7 +49,18 @@ namespace Test
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(KinectData.LastColor);
+            string color = KinectData.LastColor;
+            if (String.IsNullOrEmpty(color))
+            {
+                Console.WriteLine("EMPTY");
+            }
+            else
+            {
+                switch(color){
+                    case "RED": Console.WriteLine("red...."); break;
+                    default: Console.WriteLine("other"); break;
+                }
+            }
         }
     }
 }
