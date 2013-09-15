@@ -97,9 +97,19 @@ namespace Corgie
 
         private static string _col = "";
         
+
+
         public Paw RightHand = new Paw();
         public Paw LeftHand = new Paw();
 
+
+        public void Nuke()
+        {
+            _interactionStream.Dispose();
+            Sensor.SkeletonStream.Disable();
+            Sensor.DepthStream.Disable();
+            Sensor.Stop();
+        }
 
         public String LastColor
         {
