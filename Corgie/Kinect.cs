@@ -250,8 +250,6 @@ namespace Corgie
                 }
             }
 
-            Console.WriteLine(LeftLegRaised);
-
             foreach (Skeleton s in _skeletonData)
             {
                 if (s == null || s.TrackingId == 0) continue;
