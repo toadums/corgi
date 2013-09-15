@@ -21,7 +21,7 @@ namespace Corgie
             return "Pos: <" + Pos.X + ", " + Pos.Y + ">" + "  Grip: " + Gripped + "  Released: " + Released + "  Pressed: " + Pressed;
         }
 
-        public Corgi2 Pos;
+        public Corgi2 Pos = new Corgi2(0,0);
         public bool _gripped;
         public bool _released;
         public bool Pressed;
