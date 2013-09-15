@@ -12,6 +12,58 @@ using System.Threading.Tasks;
 
 namespace Corgie
 {
+
+    public class Paw
+    {
+
+        public override string ToString()
+        {   
+            return "Pos: <" + Pos.X + ", " + Pos.Y + ">" + "  Grip: " + Gripped + "  Released: " + Released + "  Pressed: " + Pressed;
+        }
+
+        public Corgi2 Pos;
+        public bool _gripped;
+        public bool _released;
+        public bool Pressed;
+        public bool Active;
+
+        public bool Gripped
+        {
+            get
+            {
+                bool g = _gripped;
+                _gripped = false;
+                return g;
+            }
+
+            set
+            {
+                _gripped = value;
+            }
+
+        }
+
+        public bool Released
+        {
+            get
+            {
+                bool r = _released;
+                _released = false;
+                return r;
+            }
+
+            set
+            {
+                _released = value;
+            }
+
+        }
+
+        public Paw(){
+
+        }
+    }
+
     public class Kinect
     {
 
@@ -44,16 +96,10 @@ namespace Corgie
         }
 
         private static string _col = "";
+        
+        public Paw RightHand = new Paw();
+        public Paw LeftHand = new Paw();
 
-        private Corgi2 _hand;
-
-        public Corgi2 Hand
-        {
-            get
-            {
-                return _hand;
-            }
-        }
 
         public String LastColor
         {
@@ -201,7 +247,6 @@ namespace Corgie
                     skelFrame.CopySkeletonDataTo(_skeletonData);
                     var accelerometerReading = Sensor.AccelerometerGetCurrentReading();
                     _interactionStream.ProcessSkeleton(_skeletonData, accelerometerReading, skelFrame.Timestamp);
-               
                 }
             }
 
@@ -240,7 +285,6 @@ namespace Corgie
             }
 
             return point;
-
         }
 
         public Corgi2 HeadVector
@@ -410,7 +454,7 @@ namespace Corgie
         }
 
 
-        public float RFRPAngle
+        public float RFPAngle
         {
             get
             {
@@ -423,9 +467,9 @@ namespace Corgie
 
                 foreach (Joint j in PlayerSkeleton.Joints)
                 {
-                    if (j.JointType == JointType.ShoulderRight)
+                    if (j.JointType == JointType.HipCenter)
                         hip = j;
-                    else if (j.JointType == JointType.HandRight)
+                    else if (j.JointType == JointType.FootLeft)
                         foot = j;
                 }
 
@@ -435,7 +479,7 @@ namespace Corgie
 
                 Corgi2 leg = new Corgi2(foot.Position.X - hip.Position.X, foot.Position.Y - hip.Position.Y);
                 leg.Normalize();
-                Corgi2 plane = new Corgi2(leg.X < 0 ? -1 : 1, 0);
+                Corgi2 plane = new Corgi2(0, -1);
                 plane.Normalize();
 
                 float theta = (float)leg.Dot(plane);
@@ -443,12 +487,53 @@ namespace Corgie
 
 
                 //Set the correct Sign
-                return theta * (leg.Y < 0 ? -1 : 1);
+                return theta * 180.0f / (float)Math.PI;
             }
         }
 
+        public float LFPAngle
+        {
+            get
+            {
+
+                if (PlayerSkeleton == null)
+                    return 0;
+
+                Joint hip = new Joint();
+                Joint foot = new Joint();
+
+                foreach (Joint j in PlayerSkeleton.Joints)
+                {
+                    if (j.JointType == JointType.HipCenter)
+                        hip = j;
+                    else if (j.JointType == JointType.FootRight)
+                        foot = j;
+                }
+
+                if (Length(hip.Position) == 0 && Length(foot.Position) == 0)
+                    return 0;
 
 
+                Corgi2 leg = new Corgi2(foot.Position.X - hip.Position.X, foot.Position.Y - hip.Position.Y);
+                leg.Normalize();
+                Corgi2 plane = new Corgi2(0, -1);
+                plane.Normalize();
+
+                float theta = (float)leg.Dot(plane);
+                theta = (float)Math.Acos(theta);
+
+                //Set the correct Sign
+                return theta * 180.0f / (float)Math.PI;
+            }
+        }
+
+        public float CrotchAngle
+        {
+            get
+            {
+                return RFPAngle + LFPAngle;
+            }
+        }
 
 
         public Corgi2 LForearmNorm
@@ -515,8 +600,6 @@ namespace Corgie
                 string value;
                 recognizer.AdditionalInfo.TryGetValue("Kinect", out value);
                 
-                System.Diagnostics.Debug.WriteLine("True".Equals(value, StringComparison.OrdinalIgnoreCase));
-
                 if ("True".Equals(value, StringComparison.OrdinalIgnoreCase) && "en-US".Equals(recognizer.Culture.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     return recognizer;
@@ -573,20 +656,32 @@ namespace Corgie
             var hasUser = false;
             foreach (var userInfo in _userInfos)
             {
+
                 var userID = userInfo.SkeletonTrackingId;
                 if (userID == 0)
                     continue;
 
-                hasUser = true;
-                dump.AppendLine("User ID = " + userID);
-                dump.AppendLine("  Hands: ");
                 var hands = userInfo.HandPointers;
-                if (hands.Count == 0)
-                    dump.AppendLine("    No hands");
-                else
+                if (hands.Count != 0)
                 {
+                    
+                    int left = hands[0].HandType == InteractionHandType.Left? 0: 1;
+                    int right = 1 - left;
 
-                   _hand = new Corgi2((float)hands[0].X, (float)hands[0].Y);
+                    RightHand.Pos = new Corgi2((float)hands[right].X, (float)hands[right].Y);
+                    RightHand.Pressed = hands[right].IsPressed;
+                    if(hands[right].HandEventType == InteractionHandEventType.Grip) RightHand.Gripped = true;
+                    if(hands[right].HandEventType == InteractionHandEventType.GripRelease) RightHand.Released = true;
+                    RightHand.Active = hands[right].IsActive;
+
+                    LeftHand.Pos = new Corgi2((float)hands[right].X, (float)hands[right].Y);
+                    LeftHand.Pressed = hands[right].IsPressed;
+                    if (hands[right].HandEventType == InteractionHandEventType.Grip) LeftHand.Gripped = true;
+                    if (hands[right].HandEventType == InteractionHandEventType.GripRelease) LeftHand.Released = true;
+                    LeftHand.Active = hands[left].IsActive;
+                    
+                        
+                
                 }
             }
         }   
