@@ -67,19 +67,19 @@ namespace Corgie
     public class Kinect
     {
 
-        bool NearMode = false;
-        bool NoSkel = true;
-        KinectSensor Sensor;
-        Skeleton[] _skeletonData;
+        static bool NearMode = false;
+        static bool NoSkel = true;
+        static KinectSensor Sensor;
+        static Skeleton[] _skeletonData;
 
-        Skeleton _skeleton = null;
-        SpeechRecognitionEngine SpeechEngine;
+        static Skeleton _skeleton = null;
+        static SpeechRecognitionEngine SpeechEngine;
 
-        Corgi2 WorldSize;
+        static Corgi2 WorldSize;
 
-        InteractionStream _interactionStream;
-        private UserInfo[] _userInfos; //the information about the interactive users
-        Skeleton PlayerSkeleton
+        static InteractionStream _interactionStream;
+        private static UserInfo[] _userInfos; //the information about the interactive users
+        static Skeleton PlayerSkeleton
         {
             get
             {
@@ -96,11 +96,11 @@ namespace Corgie
         }
 
         private static string _col = "";
-        
 
 
-        public Paw RightHand = new Paw();
-        public Paw LeftHand = new Paw();
+
+        public static Paw RightHand = new Paw();
+        public static Paw LeftHand = new Paw();
 
 
         public void Nuke()
@@ -111,7 +111,7 @@ namespace Corgie
             Sensor.Stop();
         }
 
-        public String LastColor
+        public static String LastColor
         {
             get
             {
@@ -126,12 +126,12 @@ namespace Corgie
             }
         }
 
-        public Kinect(int x, int y)
+        public static Kinect(int x, int y)
         {
             WorldSize = new Corgi2(x, y);
         }
 
-        public void Init()
+        public static void Init()
         {
 
             foreach (var potentialSensor in KinectSensor.KinectSensors)
@@ -228,7 +228,7 @@ namespace Corgie
             }
         }
 
-        private void SensorOnDepthFrameReady(object sender, DepthImageFrameReadyEventArgs depthImageFrameReadyEventArgs)
+        private static void SensorOnDepthFrameReady(object sender, DepthImageFrameReadyEventArgs depthImageFrameReadyEventArgs)
         {
             using (DepthImageFrame depthFrame = depthImageFrameReadyEventArgs.OpenDepthImageFrame())
             {
@@ -248,7 +248,7 @@ namespace Corgie
         }
 
         #region SKELETON
-        private void Sensor_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
+        private static void Sensor_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
             using (SkeletonFrame skelFrame = e.OpenSkeletonFrame())
             {
@@ -281,7 +281,7 @@ namespace Corgie
 
         }
 
-        public SkeletonPoint GetJointPos(JointType joint)
+        public static SkeletonPoint GetJointPos(JointType joint)
         {
 
             SkeletonPoint point = new SkeletonPoint();
@@ -297,7 +297,7 @@ namespace Corgie
             return point;
         }
 
-        public Corgi2 HeadVector
+        public static Corgi2 HeadVector
         {
             get
             {
@@ -328,7 +328,7 @@ namespace Corgie
             }
         }
 
-        public float HeadNormAngle
+        public static float HeadNormAngle
         {
             get
             {
@@ -349,7 +349,7 @@ namespace Corgie
             }
         }
 
-        public Corgi2 HeadNormal
+        public static Corgi2 HeadNormal
         {
             get
             {
@@ -359,7 +359,7 @@ namespace Corgie
         }
 
 
-        public float RHRSAngle
+        public static float RHRSAngle
         {
             get
             {
@@ -396,7 +396,7 @@ namespace Corgie
             }
         }
 
-        public float RPRKAngle
+        public static float RPRKAngle
         {
             get
             {
@@ -432,7 +432,7 @@ namespace Corgie
             }
         }
 
-        public Corgi2 LHLEVector
+        public static Corgi2 LHLEVector
         {
             get
             {
@@ -464,7 +464,7 @@ namespace Corgie
         }
 
 
-        public float RFPAngle
+        public static float RFPAngle
         {
             get
             {
@@ -501,7 +501,7 @@ namespace Corgie
             }
         }
 
-        public float LFPAngle
+        public static float LFPAngle
         {
             get
             {
@@ -537,7 +537,7 @@ namespace Corgie
             }
         }
 
-        public bool LeftLegRaised
+        public static bool LeftLegRaised
         {
             get
             {
@@ -562,7 +562,7 @@ namespace Corgie
             }
         }
 
-        public bool RightLegRaised
+        public static bool RightLegRaised
         {
             get
             {
@@ -588,7 +588,7 @@ namespace Corgie
             }
         }
 
-        public float CrotchAngle
+        public static float CrotchAngle
         {
             get
             {
@@ -597,7 +597,7 @@ namespace Corgie
         }
 
 
-        public Corgi2 LForearmNorm
+        public static Corgi2 LForearmNorm
         {
             get
             {   
@@ -606,7 +606,7 @@ namespace Corgie
             }
         }
 
-        public float UserZ
+        public static float UserZ
         {
             get
             {
@@ -615,7 +615,7 @@ namespace Corgie
         }
 
 
-        public float UserX
+        public static float UserX
         {
             get
             {
@@ -623,7 +623,7 @@ namespace Corgie
             }
         }
 
-        public bool UserReady
+        public static bool UserReady
         {
             get
             {
@@ -634,12 +634,12 @@ namespace Corgie
         #endregion
 
         #region HELPER
-        private float Length(float x, float y, float z)
+        private static float Length(float x, float y, float z)
         {
             return (float)Math.Sqrt(x * x + y * y + z * z);
         }
 
-        private float Length(SkeletonPoint p)
+        private static float Length(SkeletonPoint p)
         {
             return (float)Math.Sqrt(p.X * p.X + p.Y * p.Y + p.Z * p.Z);
         }
@@ -670,7 +670,7 @@ namespace Corgie
             return null;
         }
 
-        private void SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        private static void SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
 
             // Speech utterance confidence below which we treat speech as if it hadn't been heard
@@ -699,10 +699,10 @@ namespace Corgie
 
         #endregion
 
-        private Dictionary<int, InteractionHandEventType> _lastLeftHandEvents = new Dictionary<int, InteractionHandEventType>();
-        private Dictionary<int, InteractionHandEventType> _lastRightHandEvents = new Dictionary<int, InteractionHandEventType>();
+        private static Dictionary<int, InteractionHandEventType> _lastLeftHandEvents = new Dictionary<int, InteractionHandEventType>();
+        private static Dictionary<int, InteractionHandEventType> _lastRightHandEvents = new Dictionary<int, InteractionHandEventType>();
 
-        private void InteractionStreamOnInteractionFrameReady(object sender, InteractionFrameReadyEventArgs args)
+        private static void InteractionStreamOnInteractionFrameReady(object sender, InteractionFrameReadyEventArgs args)
         {
             using (var iaf = args.OpenInteractionFrame()) //dispose as soon as possible
             {
@@ -752,7 +752,7 @@ namespace Corgie
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private void ChangeViewMode(string mode)
+        private static void ChangeViewMode(string mode)
         {
             if (Sensor != null)
             {
