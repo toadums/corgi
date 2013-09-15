@@ -64,7 +64,7 @@ namespace Corgie
         }
     }
 
-    public class Kinect
+    public class ein
     {
 
         static bool NearMode = false;
@@ -102,13 +102,11 @@ namespace Corgie
         public static Paw RightHand = new Paw();
         public static Paw LeftHand = new Paw();
 
+        public static bool HasBeenInit = false;
 
         public void Nuke()
         {
-            _interactionStream.Dispose();
-            Sensor.SkeletonStream.Disable();
-            Sensor.DepthStream.Disable();
-            Sensor.Stop();
+          
         }
 
         public static String LastColor
@@ -126,13 +124,16 @@ namespace Corgie
             }
         }
 
-        public static Kinect(int x, int y)
+        public ein()
         {
-            WorldSize = new Corgi2(x, y);
         }
 
         public static void Init()
         {
+
+            if (HasBeenInit) { return; }
+
+                 HasBeenInit = true;
 
             foreach (var potentialSensor in KinectSensor.KinectSensors)
             {

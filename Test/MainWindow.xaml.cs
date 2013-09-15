@@ -22,7 +22,6 @@ namespace Test
     public partial class MainWindow : Window
     {
 
-        Kinect KinectData = new Kinect(200,200);
         DrawingGroup drawingGroup;
         DrawingImage imageSource;
         
@@ -30,7 +29,6 @@ namespace Test
 
         public MainWindow()
         {
-            KinectData.Init();
                 
             InitializeComponent();
         }
@@ -49,18 +47,7 @@ namespace Test
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
-            string color = KinectData.LastColor;
-            if (String.IsNullOrEmpty(color))
-            {
-                Console.WriteLine("EMPTY");
-            }
-            else
-            {
-                switch(color){
-                    case "RED": Console.WriteLine("red...."); break;
-                    default: Console.WriteLine("other"); break;
-                }
-            }
+            
         }
     }
 }
