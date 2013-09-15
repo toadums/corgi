@@ -250,6 +250,8 @@ namespace Corgie
                 }
             }
 
+            Console.WriteLine(LeftLegRaised);
+
             foreach (Skeleton s in _skeletonData)
             {
                 if (s == null || s.TrackingId == 0) continue;
@@ -524,6 +526,57 @@ namespace Corgie
 
                 //Set the correct Sign
                 return theta * 180.0f / (float)Math.PI;
+            }
+        }
+
+        public bool LeftLegRaised
+        {
+            get
+            {
+                if (PlayerSkeleton == null)
+                    return false;
+
+                Joint foot = new Joint();
+                foreach (Joint j in PlayerSkeleton.Joints)
+                {
+                    if (j.JointType == JointType.FootLeft){
+                        foot = j;
+                        break;
+                    }
+                }
+
+                if (foot.Position.Y > -0.7 )
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
+        public bool RightLegRaised
+        {
+            get
+            {
+                if (PlayerSkeleton == null)
+                    return false;
+
+                Joint foot = new Joint();
+                foreach (Joint j in PlayerSkeleton.Joints)
+                {
+                    if (j.JointType == JointType.FootRight)
+                    {
+                        foot = j;
+                        break;
+                    }
+                }
+
+                if (foot.Position.Y > -0.7)
+                {
+                    return true;
+                }
+
+                return false;
             }
         }
 
