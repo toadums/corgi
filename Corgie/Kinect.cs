@@ -674,10 +674,10 @@ namespace Corgie
                     if(hands[right].HandEventType == InteractionHandEventType.GripRelease) RightHand.Released = true;
                     RightHand.Active = hands[right].IsActive;
 
-                    LeftHand.Pos = new Corgi2((float)hands[right].X, (float)hands[right].Y);
-                    LeftHand.Pressed = hands[right].IsPressed;
-                    if (hands[right].HandEventType == InteractionHandEventType.Grip) LeftHand.Gripped = true;
-                    if (hands[right].HandEventType == InteractionHandEventType.GripRelease) LeftHand.Released = true;
+                    LeftHand.Pos = new Corgi2((float)hands[left].X, (float)hands[left].Y);
+                    LeftHand.Pressed = hands[left].IsPressed;
+                    if (hands[left].HandEventType == InteractionHandEventType.Grip) LeftHand.Gripped = true;
+                    if (hands[left].HandEventType == InteractionHandEventType.GripRelease) LeftHand.Released = true;
                     LeftHand.Active = hands[left].IsActive;
                     
                         
